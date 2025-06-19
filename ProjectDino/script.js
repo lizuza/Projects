@@ -4,6 +4,12 @@ let boardWidth = 750;
 let boardHeight = 250;
 let context;
 
+//track
+let trackWidth = 2404;
+let trackHeight = 28;
+let trackX = 0;
+let trackY = boardHeight - trackHeight;
+
 //dino
 let dinoWidth = 88;
 let dinoHeight = 94;
@@ -48,6 +54,12 @@ window.onload = function() {
 
     context = board.getContext("2d");
 
+    trackImg = new Image();
+    trackImg.src = "./img/track.png";
+
+    dinoDeadImg = new Image();
+    dinoDeadImg.src = "./img/dino-dead.png";
+
     dinoImg = new Image();
     dinoImg.src = "./img/dino.png";
     dinoImg.onload = function() {
@@ -75,8 +87,20 @@ function update(){
 
     context.clearRect(0, 0, board.width, board.height);
 
+    //track
+    context.drawImage(trackImg, trackX, trackY, trackWidth, trackHeight);
+    context.drawImage(trackImg, trackX + trackWidth, trackY, trackWidth, trackHeight);
+    trackX += velocityX;
+    if (trackX <= -trackWidth) {
+        trackX = 0;
+    }
+
     //dino
+    if (!gameOver) {
     context.drawImage(dinoImg, dino.x, dino.y, dino.width, dino.height);
+    } else {
+    context.drawImage(dinoDeadImg, dino.x, dino.y, dino.width, dino.height);
+    }   
     velocityY += gravity;
     dino.y = Math.min(dinoY, dino.y + velocityY);
 
@@ -87,15 +111,13 @@ function update(){
         context.drawImage(cactus.img, cactus.x, cactus.y, cactus.width, cactus.height);
 
         if(detectCollision(dino, cactus)){
-            gameOver = true;
-            dinoImg.src = "./img/dino_dead.png";
-            dinoImg.onload = function() {
-                context.drawImage(dinoImg, dino.x, dino.y, dino.width, dino.height);
-            }
-            alert("Game Over! Your score: " + score);
-            return;
+          gameOver = true;
+          context.drawImage(dinoDeadImg, dino.x, dino.y, dino.width, dino.height);
+          alert("Game Over! Your score: " + score);
+          return;
         }
-    }
+    }    
+  
     //score
     context.fillStyle = "black";
     context.font = "20px courier";
