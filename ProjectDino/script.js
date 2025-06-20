@@ -32,7 +32,7 @@ let cactus1Img;
 let cactus2Img;
 let cactus3Img;
 
-//phisics
+//physics
 let velocityX = -8; //speed of the cactus
 let velocityY = 0;
 let gravity = .4;
@@ -47,6 +47,9 @@ let dino = {
     height : dinoHeight,
 }
 
+let counter = 0;
+let gameRunning = false;
+
 window.onload = function() {
     board = document.getElementById("board");
     board.height = boardHeight;
@@ -54,10 +57,10 @@ window.onload = function() {
 
     context = board.getContext("2d");
 
-    trackImg = new Image();
+    let trackImg = new Image();
     trackImg.src = "./img/track.png";
 
-    dinoDeadImg = new Image();
+    let dinoDeadImg = new Image();
     dinoDeadImg.src = "./img/dino-dead.png";
     dinoDeadImg.onload = function() {
         context.drawImage(dinoDeadImg, dino.x, dino.y, dino.width, dino.height);
@@ -67,6 +70,7 @@ window.onload = function() {
     dinoImg.src = "./img/dino.png";
     dinoImg.onload = function() {
         context.drawImage(dinoImg, dino.x, dino.y, dino.width, dino.height);
+    };
 
     cactus1Img = new Image();
     cactus1Img.src = "./img/cactus1.png";
@@ -76,17 +80,32 @@ window.onload = function() {
 
     cactus3Img = new Image();
     cactus3Img.src = "./img/cactus3.png";
-}
-    requestAnimationFrame(update);
+
+    // Start the game loop
+    gameRunning = true;
+    gameLoop();
     setInterval(placeCactus, 1000);
     document.addEventListener("keydown", moveDino);
 }
 
+async function gameLoop() {
+    while (gameRunning) {
+        update();
+        // Wait for next frame (approximately 60 FPS)
+        await new Promise(resolve => setTimeout(resolve, 16));
+    }
+}
+
 function update(){
-    requestAnimationFrame(update);
+    counter++
+    console.log("counter", counter);
+
     if(gameOver){
-        return
-    }    
+        context.drawImage(dinoDeadImg, dino.x, dino.y, dino.width, dino.height);
+        alert("Game Over! Your score: " + score);
+        gameRunning = false; // Stop the game loop
+        return;
+    }
 
     context.clearRect(0, 0, board.width, board.height);
 
@@ -99,11 +118,8 @@ function update(){
     }
 
     //dino
-    if (!gameOver) {
     context.drawImage(dinoImg, dino.x, dino.y, dino.width, dino.height);
-    } else {
-    context.drawImage(dinoDeadImg, dino.x, dino.y, dino.width, dino.height);
-    }   
+
     velocityY += gravity;
     dino.y += velocityY;
 
@@ -123,14 +139,10 @@ function update(){
         context.drawImage(cactus.img, cactus.x, cactus.y, cactus.width, cactus.height);
 
         if (detectCollision(dino, cactus)) {
-        gameOver = true;
-        setTimeout(() => {
-            alert("Game Over! Your score: " + score);
-        }, 100);
-        return;
+            gameOver = true;
         }
-    }    
-  
+    }
+
     //score
     context.fillStyle = "black";
     context.font = "20px courier";
@@ -141,23 +153,23 @@ function update(){
 function moveDino(e){
     if(gameOver){
         return
-    }    
+    }
 
     if ((e.code === "Space" || e.code === "ArrowUp") && dino.y === dinoY) {
-    velocityY = -10;
+        velocityY = -10;
     }
 }
 
 function placeCactus(){
     if(gameOver){
         return
-    }    
+    }
     let cactus = {
-       img : null,
-       x : cactusX,
-       y : cactusY,
-       width : null,
-       height : cactusHeight,
+        img : null,
+        x : cactusX,
+        y : cactusY,
+        width : null,
+        height : cactusHeight,
     }
     let placeCactusChance = Math.random();
 
@@ -183,8 +195,8 @@ function placeCactus(){
 }
 
 function detectCollision(a, b){
-  return a.x < b.x + b.width &&
-         a.x + a.width > b.x &&
-         a.y < b.y + b.height &&
-         a.y + a.height > b.y;
+    return a.x < b.x + b.width &&
+        a.x + a.width > b.x &&
+        a.y < b.y + b.height &&
+        a.y + a.height > b.y;
 }
