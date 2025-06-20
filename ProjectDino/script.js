@@ -59,6 +59,9 @@ window.onload = function() {
 
     dinoDeadImg = new Image();
     dinoDeadImg.src = "./img/dino-dead.png";
+    dinoDeadImg.onload = function() {
+        context.drawImage(dinoDeadImg, dino.x, dino.y, dino.width, dino.height);
+    };
 
     dinoImg = new Image();
     dinoImg.src = "./img/dino.png";
@@ -102,7 +105,16 @@ function update(){
     context.drawImage(dinoDeadImg, dino.x, dino.y, dino.width, dino.height);
     }   
     velocityY += gravity;
-    dino.y = Math.min(dinoY, dino.y + velocityY);
+    dino.y += velocityY;
+
+    if (dino.y < 0) {
+        dino.y = 0;
+        velocityY = 0;
+    }
+    if (dino.y > dinoY) {
+        dino.y = dinoY;
+        velocityY = 0;
+    }
 
     //cactus
     for(let i = 0; i < cactusArray.length; i++){
@@ -110,11 +122,12 @@ function update(){
         cactus.x += velocityX;
         context.drawImage(cactus.img, cactus.x, cactus.y, cactus.width, cactus.height);
 
-        if(detectCollision(dino, cactus)){
-          gameOver = true;
-          context.drawImage(dinoDeadImg, dino.x, dino.y, dino.width, dino.height);
-          alert("Game Over! Your score: " + score);
-          return;
+        if (detectCollision(dino, cactus)) {
+        gameOver = true;
+        setTimeout(() => {
+            alert("Game Over! Your score: " + score);
+        }, 100);
+        return;
         }
     }    
   
@@ -130,8 +143,8 @@ function moveDino(e){
         return
     }    
 
-    if(e.code === "Space" || e.code === "ArrowUp" && dino.y == dinoY){
-        velocityY = -10; //jump
+    if ((e.code === "Space" || e.code === "ArrowUp") && dino.y === dinoY) {
+    velocityY = -10;
     }
 }
 
